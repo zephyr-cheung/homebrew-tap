@@ -46,10 +46,11 @@ class SodaLyrics < Formula
 
     # 2) Swift UI（brew swift toolchain；产物按 SwiftPM 布局 glob 兜底）
     swift = Formula["swift"].opt_bin/"swift"
-    # SwiftPM manifest 编译默认走 sandbox-exec，brew 构建环境会拒绝（Operation not permitted）
+    # SwiftPM manifest 编译默认走 sandbox-exec；brew 公式沙箱内嵌套沙箱会被拒
+    # （sandbox_apply: Operation not permitted），显式禁用沙箱
     ENV["SWIFTPM_DISABLE_SANDBOX"] = "1"
     Dir.chdir("swift-ui") do
-      system swift, "build", "-c", "release"
+      system swift, "build", "-c", "release", "--disable-sandbox"
     end
     swift_bin = Dir.glob("swift-ui/.build/**/release/soda-lyrics").first
     odie "Swift build output not found" unless swift_bin
